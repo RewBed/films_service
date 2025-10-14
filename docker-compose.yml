@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: films_postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles:
+      - db-only
+      - default
+  
+  films_service:
+    build: .
+    container_name: films_service
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    ports:
+      - "${REST_PORT}:3000"
+      - "${GRPC_PORT}:50051"
+    profiles:
+      - default
+
+volumes:
+  postgres_data:
