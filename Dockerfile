@@ -1,43 +1,45 @@
-# 1. Базовый образ
+# 1️⃣ Билд-этап
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# 2. Копируем package.json и package-lock.json и устанавливаем зависимости
+# 2️⃣ Копируем package.json и ставим зависимости
 COPY package*.json ./
 RUN npm ci
 
-# 3. Копируем весь исходный код (включая prisma/schema.prisma)
+# 3️⃣ Копируем код и Prisma schema
 COPY . .
 
-# 4. Генерация Prisma клиента
+# 4️⃣ Генерируем Prisma Client
 RUN npx prisma generate
 
-# 5. Генерация ts-proto файлов
+# 5️⃣ Генерируем ts-proto файлы
 RUN npx protoc \
     --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto \
     --ts_proto_out=./ \
     --ts_proto_opt=nestJs=true,addGrpcMetadata=true,outputServices=grpc-js \
     src/proto/*.proto
 
-# 6. Сборка TypeScript
+# 6️⃣ Собираем TypeScript
 RUN npm run build
 
 
-# 7. Runtime образ
+# 7️⃣ Runtime-этап
 FROM node:20-alpine
 WORKDIR /app
 
-# Копируем node_modules и dist из builder
+# 8️⃣ Копируем необходимые части из builder-а
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-
-# Копируем proto и prisma
 COPY --from=builder /app/src/proto ./src/proto
 COPY --from=builder /app/prisma ./prisma
+
+# 9️⃣ Генерация Prisma Client внутри runtime-слоя (обязательно!)
+RUN npx prisma generate
+
+# 🔟 Выполняем миграции при запуске и стартуем приложение
+CMD npx prisma migrate deploy --schema=prisma/schema.prisma && node dist/src/main.js
 
 # Порты
 EXPOSE 3000
 EXPOSE 50051
-
-# Запуск
-CMD npx prisma migrate deploy --schema=prisma/schema.prisma && node dist/src/main.js

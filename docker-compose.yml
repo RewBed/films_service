@@ -26,8 +26,8 @@ services:
     depends_on:
       - postgres
     ports:
-      - "${REST_PORT}:3000"
-      - "${GRPC_PORT}:50051"
+      - "${REST_PORT}:${REST_PORT}"
+      - "${GRPC_PORT}:${GRPC_PORT}"
     profiles:
       - default
 
