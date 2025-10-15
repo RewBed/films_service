@@ -15,15 +15,103 @@ datasource db {
 }
 
 model Film {
-  id                Int      @id @default(autoincrement())
-  title             String
-  original_title    String?
-  overview          String?
-  release_date      DateTime?
-  original_language String?
-  
-  themoviedb_id     Int?
+  id               Int       @id @default(autoincrement())
+  themoviedbId     Int       @unique
+  imdbId           String?   
+  title            String
+  originalTitle    String
+  overview         String
+  originalLanguage String?
+  releaseDate      DateTime?
+  runtime          Int?
+  budget           BigInt?
+  revenue          BigInt?
+  popularity       Float?
+  voteAverage      Float?
+  voteCount        Int?
+  status           String?
+  tagline          String?
+  homepage         String?
+  posterPath       String?
+  backdropPath     String?
+  adult            Boolean   @default(false)
+  video            Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  genres            FilmGenre[]
+  productionCompanies FilmProductionCompany[]
+  productionCountries FilmProductionCountry[]
+  spokenLanguages   FilmSpokenLanguage[]
+}
+
+model Genre {
+  id          Int    @id @default(autoincrement())
+  themoviedbId Int    @unique  
+  name        String
+  films       FilmGenre[]
+}
+
+model FilmGenre {
+  filmId  Int
+  genreId Int
+
+  film   Film   @relation(fields: [filmId], references: [id])
+  genre  Genre  @relation(fields: [genreId], references: [id])
+
+  @@id([filmId, genreId])
+}
+
+model ProductionCompany {
+  id           Int    @id @default(autoincrement())
+  themoviedbId Int    @unique  
+  name         String
+  originCountry String?
+  logoPath     String?
+  films        FilmProductionCompany[]
+}
+
+model FilmProductionCompany {
+  filmId    Int
+  companyId Int
+
+  film    Film              @relation(fields: [filmId], references: [id])
+  company ProductionCompany @relation(fields: [companyId], references: [id])
+
+  @@id([filmId, companyId])
+}
+
+model ProductionCountry {
+  id            Int       @id @default(autoincrement())
+  isoCode       String    @unique  
+  name          String
+  films         FilmProductionCountry[]
+}
+
+model FilmProductionCountry {
+  filmId    Int
+  countryId Int
+
+  film    Film              @relation(fields: [filmId], references: [id])
+  country ProductionCountry @relation(fields: [countryId], references: [id])
+
+  @@id([filmId, countryId])
+}
+
+model SpokenLanguage {
+  id           Int    @id @default(autoincrement())
+  isoCode      String @unique
+  name         String
+  englishName  String?
+  films        FilmSpokenLanguage[]
+}
+
+model FilmSpokenLanguage {
+  filmId      Int
+  languageId  Int
+
+  film     Film           @relation(fields: [filmId], references: [id])
+  language SpokenLanguage @relation(fields: [languageId], references: [id])
+
+  @@id([filmId, languageId])
 }

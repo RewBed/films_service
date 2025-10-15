@@ -10,4 +10,9 @@ export class FilmsController {
   async getAllFilms(): Promise<Film[]> {
     return this.filmsService.getAll();
   }
+
+  @Get('random')
+  async getRandom(): Promise<any> {
+    return this.filmsService.getRandom();
+  }
 }

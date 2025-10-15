@@ -4,31 +4,88 @@ package films;
 
 import "google/protobuf/timestamp.proto";
 
-// Сообщение для создания нового фильма через gRPC
-message CreateFilmRequest {
-  string title = 1;
-  string original_title = 2;
-  string overview = 3;
-  google.protobuf.Timestamp release_date = 4;
-  string original_language = 5;
-  int32 themoviedb_id = 6;
+// ----------------------
+// Справочники с themoviedb_id
+// ----------------------
+
+message Genre {
+  int32 themoviedb_id = 1;
+  string name = 2;
 }
 
-// Сообщение для ответа (можно возвращать созданный фильм)
-message FilmResponse {
-  int32 id = 1;
+message ProductionCompany {
+  int32 themoviedb_id = 1;
+  string name = 2;
+  string origin_country = 3;
+}
+
+message Country {
+  int32 themoviedb_id = 1; // добавляем для единого идентификатора источника
+  string isoCode = 2;
+  string name = 3;
+}
+
+message Language {
+  string isoCode = 2;
+  string name = 3;
+  string english_name = 4;
+}
+
+// ----------------------
+// Основной фильм
+// ----------------------
+
+message Film {
+  int32 themoviedb_id = 1; // уникальный id источника
   string title = 2;
   string original_title = 3;
   string overview = 4;
   google.protobuf.Timestamp release_date = 5;
   string original_language = 6;
-  int32 themoviedb_id = 7;
-  google.protobuf.Timestamp createdAt = 8;
-  google.protobuf.Timestamp updatedAt = 9;
+  int32 budget = 7;
+  int32 revenue = 8;
+  int32 runtime = 9;
+  string status = 10;
+  string tagline = 11;
+  string homepage = 12;
+  string poster_path = 13;
+  string backdrop_path = 14;
+  float popularity = 15;
+  float vote_average = 16;
+  int32 vote_count = 17;
+  bool adult = 18;
+  bool video = 19;
 }
 
-// gRPC сервис фильмов
+// ----------------------
+// FullFilmData для передачи фильма с полным контекстом справочников
+// ----------------------
+
+message FullFilmData {
+  Film film = 1;
+  repeated Genre genres = 2;
+  repeated ProductionCompany companies = 3;
+  repeated Country countries = 4;
+  repeated Language languages = 5;
+}
+
+// ----------------------
+// Ответ сервиса
+// ----------------------
+
+message FilmResponse {
+  int32 id = 1;
+  string title = 2;
+  string original_title = 3;
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+}
+
+// ----------------------
+// gRPC сервис
+// ----------------------
+
 service FilmsService {
-  // Метод создания нового фильма
-  rpc CreateFilm(CreateFilmRequest) returns (FilmResponse);
+  // Upsert фильма с полным контекстом справочников
+  rpc UpsertFilm(FullFilmData) returns (FilmResponse);
 }

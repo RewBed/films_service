@@ -13,71 +13,99 @@ import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "films";
 
-/** Сообщение для создания нового фильма через gRPC */
-export interface CreateFilmRequest {
+export interface Genre {
+  themoviedbId: number;
+  name: string;
+}
+
+export interface ProductionCompany {
+  themoviedbId: number;
+  name: string;
+  originCountry: string;
+}
+
+export interface Country {
+  /** добавляем для единого идентификатора источника */
+  themoviedbId: number;
+  isoCode: string;
+  name: string;
+}
+
+export interface Language {
+  isoCode: string;
+  name: string;
+  englishName: string;
+}
+
+export interface Film {
+  /** уникальный id источника */
+  themoviedbId: number;
   title: string;
   originalTitle: string;
   overview: string;
   releaseDate: Timestamp | undefined;
   originalLanguage: string;
-  themoviedbId: number;
+  budget: number;
+  revenue: number;
+  runtime: number;
+  status: string;
+  tagline: string;
+  homepage: string;
+  posterPath: string;
+  backdropPath: string;
+  popularity: number;
+  voteAverage: number;
+  voteCount: number;
+  adult: boolean;
+  video: boolean;
 }
 
-/** Сообщение для ответа (можно возвращать созданный фильм) */
+export interface FullFilmData {
+  film: Film | undefined;
+  genres: Genre[];
+  companies: ProductionCompany[];
+  countries: Country[];
+  languages: Language[];
+}
+
 export interface FilmResponse {
   id: number;
   title: string;
   originalTitle: string;
-  overview: string;
-  releaseDate: Timestamp | undefined;
-  originalLanguage: string;
-  themoviedbId: number;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
 }
 
 export const FILMS_PACKAGE_NAME = "films";
 
-function createBaseCreateFilmRequest(): CreateFilmRequest {
-  return { title: "", originalTitle: "", overview: "", releaseDate: undefined, originalLanguage: "", themoviedbId: 0 };
+function createBaseGenre(): Genre {
+  return { themoviedbId: 0, name: "" };
 }
 
-export const CreateFilmRequest: MessageFns<CreateFilmRequest> = {
-  encode(message: CreateFilmRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.title !== "") {
-      writer.uint32(10).string(message.title);
-    }
-    if (message.originalTitle !== "") {
-      writer.uint32(18).string(message.originalTitle);
-    }
-    if (message.overview !== "") {
-      writer.uint32(26).string(message.overview);
-    }
-    if (message.releaseDate !== undefined) {
-      Timestamp.encode(message.releaseDate, writer.uint32(34).fork()).join();
-    }
-    if (message.originalLanguage !== "") {
-      writer.uint32(42).string(message.originalLanguage);
-    }
+export const Genre: MessageFns<Genre> = {
+  encode(message: Genre, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.themoviedbId !== 0) {
-      writer.uint32(48).int32(message.themoviedbId);
+      writer.uint32(8).int32(message.themoviedbId);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): CreateFilmRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): Genre {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCreateFilmRequest();
+    const message = createBaseGenre();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.title = reader.string();
+          message.themoviedbId = reader.int32();
           continue;
         }
         case 2: {
@@ -85,39 +113,7 @@ export const CreateFilmRequest: MessageFns<CreateFilmRequest> = {
             break;
           }
 
-          message.originalTitle = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.overview = reader.string();
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.releaseDate = Timestamp.decode(reader, reader.uint32());
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.originalLanguage = reader.string();
-          continue;
-        }
-        case 6: {
-          if (tag !== 48) {
-            break;
-          }
-
-          message.themoviedbId = reader.int32();
+          message.name = reader.string();
           continue;
         }
       }
@@ -130,24 +126,211 @@ export const CreateFilmRequest: MessageFns<CreateFilmRequest> = {
   },
 };
 
-function createBaseFilmResponse(): FilmResponse {
+function createBaseProductionCompany(): ProductionCompany {
+  return { themoviedbId: 0, name: "", originCountry: "" };
+}
+
+export const ProductionCompany: MessageFns<ProductionCompany> = {
+  encode(message: ProductionCompany, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.themoviedbId !== 0) {
+      writer.uint32(8).int32(message.themoviedbId);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.originCountry !== "") {
+      writer.uint32(26).string(message.originCountry);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProductionCompany {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProductionCompany();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.themoviedbId = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.originCountry = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseCountry(): Country {
+  return { themoviedbId: 0, isoCode: "", name: "" };
+}
+
+export const Country: MessageFns<Country> = {
+  encode(message: Country, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.themoviedbId !== 0) {
+      writer.uint32(8).int32(message.themoviedbId);
+    }
+    if (message.isoCode !== "") {
+      writer.uint32(18).string(message.isoCode);
+    }
+    if (message.name !== "") {
+      writer.uint32(26).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Country {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCountry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.themoviedbId = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.isoCode = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseLanguage(): Language {
+  return { isoCode: "", name: "", englishName: "" };
+}
+
+export const Language: MessageFns<Language> = {
+  encode(message: Language, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.isoCode !== "") {
+      writer.uint32(18).string(message.isoCode);
+    }
+    if (message.name !== "") {
+      writer.uint32(26).string(message.name);
+    }
+    if (message.englishName !== "") {
+      writer.uint32(34).string(message.englishName);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Language {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLanguage();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.isoCode = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.englishName = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseFilm(): Film {
   return {
-    id: 0,
+    themoviedbId: 0,
     title: "",
     originalTitle: "",
     overview: "",
     releaseDate: undefined,
     originalLanguage: "",
-    themoviedbId: 0,
-    createdAt: undefined,
-    updatedAt: undefined,
+    budget: 0,
+    revenue: 0,
+    runtime: 0,
+    status: "",
+    tagline: "",
+    homepage: "",
+    posterPath: "",
+    backdropPath: "",
+    popularity: 0,
+    voteAverage: 0,
+    voteCount: 0,
+    adult: false,
+    video: false,
   };
 }
 
-export const FilmResponse: MessageFns<FilmResponse> = {
-  encode(message: FilmResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== 0) {
-      writer.uint32(8).int32(message.id);
+export const Film: MessageFns<Film> = {
+  encode(message: Film, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.themoviedbId !== 0) {
+      writer.uint32(8).int32(message.themoviedbId);
     }
     if (message.title !== "") {
       writer.uint32(18).string(message.title);
@@ -164,22 +347,52 @@ export const FilmResponse: MessageFns<FilmResponse> = {
     if (message.originalLanguage !== "") {
       writer.uint32(50).string(message.originalLanguage);
     }
-    if (message.themoviedbId !== 0) {
-      writer.uint32(56).int32(message.themoviedbId);
+    if (message.budget !== 0) {
+      writer.uint32(56).int32(message.budget);
     }
-    if (message.createdAt !== undefined) {
-      Timestamp.encode(message.createdAt, writer.uint32(66).fork()).join();
+    if (message.revenue !== 0) {
+      writer.uint32(64).int32(message.revenue);
     }
-    if (message.updatedAt !== undefined) {
-      Timestamp.encode(message.updatedAt, writer.uint32(74).fork()).join();
+    if (message.runtime !== 0) {
+      writer.uint32(72).int32(message.runtime);
+    }
+    if (message.status !== "") {
+      writer.uint32(82).string(message.status);
+    }
+    if (message.tagline !== "") {
+      writer.uint32(90).string(message.tagline);
+    }
+    if (message.homepage !== "") {
+      writer.uint32(98).string(message.homepage);
+    }
+    if (message.posterPath !== "") {
+      writer.uint32(106).string(message.posterPath);
+    }
+    if (message.backdropPath !== "") {
+      writer.uint32(114).string(message.backdropPath);
+    }
+    if (message.popularity !== 0) {
+      writer.uint32(125).float(message.popularity);
+    }
+    if (message.voteAverage !== 0) {
+      writer.uint32(133).float(message.voteAverage);
+    }
+    if (message.voteCount !== 0) {
+      writer.uint32(136).int32(message.voteCount);
+    }
+    if (message.adult !== false) {
+      writer.uint32(144).bool(message.adult);
+    }
+    if (message.video !== false) {
+      writer.uint32(152).bool(message.video);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): FilmResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): Film {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseFilmResponse();
+    const message = createBaseFilm();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -188,7 +401,7 @@ export const FilmResponse: MessageFns<FilmResponse> = {
             break;
           }
 
-          message.id = reader.int32();
+          message.themoviedbId = reader.int32();
           continue;
         }
         case 2: {
@@ -236,19 +449,261 @@ export const FilmResponse: MessageFns<FilmResponse> = {
             break;
           }
 
-          message.themoviedbId = reader.int32();
+          message.budget = reader.int32();
           continue;
         }
         case 8: {
-          if (tag !== 66) {
+          if (tag !== 64) {
+            break;
+          }
+
+          message.revenue = reader.int32();
+          continue;
+        }
+        case 9: {
+          if (tag !== 72) {
+            break;
+          }
+
+          message.runtime = reader.int32();
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 11: {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.tagline = reader.string();
+          continue;
+        }
+        case 12: {
+          if (tag !== 98) {
+            break;
+          }
+
+          message.homepage = reader.string();
+          continue;
+        }
+        case 13: {
+          if (tag !== 106) {
+            break;
+          }
+
+          message.posterPath = reader.string();
+          continue;
+        }
+        case 14: {
+          if (tag !== 114) {
+            break;
+          }
+
+          message.backdropPath = reader.string();
+          continue;
+        }
+        case 15: {
+          if (tag !== 125) {
+            break;
+          }
+
+          message.popularity = reader.float();
+          continue;
+        }
+        case 16: {
+          if (tag !== 133) {
+            break;
+          }
+
+          message.voteAverage = reader.float();
+          continue;
+        }
+        case 17: {
+          if (tag !== 136) {
+            break;
+          }
+
+          message.voteCount = reader.int32();
+          continue;
+        }
+        case 18: {
+          if (tag !== 144) {
+            break;
+          }
+
+          message.adult = reader.bool();
+          continue;
+        }
+        case 19: {
+          if (tag !== 152) {
+            break;
+          }
+
+          message.video = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseFullFilmData(): FullFilmData {
+  return { film: undefined, genres: [], companies: [], countries: [], languages: [] };
+}
+
+export const FullFilmData: MessageFns<FullFilmData> = {
+  encode(message: FullFilmData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.film !== undefined) {
+      Film.encode(message.film, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.genres) {
+      Genre.encode(v!, writer.uint32(18).fork()).join();
+    }
+    for (const v of message.companies) {
+      ProductionCompany.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.countries) {
+      Country.encode(v!, writer.uint32(34).fork()).join();
+    }
+    for (const v of message.languages) {
+      Language.encode(v!, writer.uint32(42).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): FullFilmData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFullFilmData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.film = Film.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.genres.push(Genre.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.companies.push(ProductionCompany.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.countries.push(Country.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.languages.push(Language.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseFilmResponse(): FilmResponse {
+  return { id: 0, title: "", originalTitle: "", createdAt: undefined, updatedAt: undefined };
+}
+
+export const FilmResponse: MessageFns<FilmResponse> = {
+  encode(message: FilmResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.title !== "") {
+      writer.uint32(18).string(message.title);
+    }
+    if (message.originalTitle !== "") {
+      writer.uint32(26).string(message.originalTitle);
+    }
+    if (message.createdAt !== undefined) {
+      Timestamp.encode(message.createdAt, writer.uint32(34).fork()).join();
+    }
+    if (message.updatedAt !== undefined) {
+      Timestamp.encode(message.updatedAt, writer.uint32(42).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): FilmResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFilmResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.title = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.originalTitle = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
             break;
           }
 
           message.createdAt = Timestamp.decode(reader, reader.uint32());
           continue;
         }
-        case 9: {
-          if (tag !== 74) {
+        case 5: {
+          if (tag !== 42) {
             break;
           }
 
@@ -265,28 +720,24 @@ export const FilmResponse: MessageFns<FilmResponse> = {
   },
 };
 
-/** gRPC сервис фильмов */
-
 export interface FilmsServiceClient {
-  /** Метод создания нового фильма */
+  /** Upsert фильма с полным контекстом справочников */
 
-  createFilm(request: CreateFilmRequest, metadata?: Metadata): Observable<FilmResponse>;
+  upsertFilm(request: FullFilmData, metadata?: Metadata): Observable<FilmResponse>;
 }
 
-/** gRPC сервис фильмов */
-
 export interface FilmsServiceController {
-  /** Метод создания нового фильма */
+  /** Upsert фильма с полным контекстом справочников */
 
-  createFilm(
-    request: CreateFilmRequest,
+  upsertFilm(
+    request: FullFilmData,
     metadata?: Metadata,
   ): Promise<FilmResponse> | Observable<FilmResponse> | FilmResponse;
 }
 
 export function FilmsServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createFilm"];
+    const grpcMethods: string[] = ["upsertFilm"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("FilmsService", method)(constructor.prototype[method], method, descriptor);
@@ -301,24 +752,23 @@ export function FilmsServiceControllerMethods() {
 
 export const FILMS_SERVICE_NAME = "FilmsService";
 
-/** gRPC сервис фильмов */
 export type FilmsServiceService = typeof FilmsServiceService;
 export const FilmsServiceService = {
-  /** Метод создания нового фильма */
-  createFilm: {
-    path: "/films.FilmsService/CreateFilm",
+  /** Upsert фильма с полным контекстом справочников */
+  upsertFilm: {
+    path: "/films.FilmsService/UpsertFilm",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: CreateFilmRequest): Buffer => Buffer.from(CreateFilmRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer): CreateFilmRequest => CreateFilmRequest.decode(value),
+    requestSerialize: (value: FullFilmData): Buffer => Buffer.from(FullFilmData.encode(value).finish()),
+    requestDeserialize: (value: Buffer): FullFilmData => FullFilmData.decode(value),
     responseSerialize: (value: FilmResponse): Buffer => Buffer.from(FilmResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer): FilmResponse => FilmResponse.decode(value),
   },
 } as const;
 
 export interface FilmsServiceServer extends UntypedServiceImplementation {
-  /** Метод создания нового фильма */
-  createFilm: handleUnaryCall<CreateFilmRequest, FilmResponse>;
+  /** Upsert фильма с полным контекстом справочников */
+  upsertFilm: handleUnaryCall<FullFilmData, FilmResponse>;
 }
 
 export interface MessageFns<T> {

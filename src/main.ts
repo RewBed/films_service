@@ -14,15 +14,15 @@ async function bootstrap() {
     options: {
       package: 'films',
       protoPath,
-      url: `0.0.0.0:${process.env.GRPC_PORT ?? 50057}`,
+      url: `0.0.0.0:${process.env.GRPC_PORT}`,
     },
   });
 
   await app.startAllMicroservices();
-  await app.listen(process.env.REST_PORT ?? 3000);
+  await app.listen(process.env.REST_PORT ?? 3007, '0.0.0.0');
 
-  console.log(`REST API running on http://localhost:${process.env.REST_PORT ?? 3000}`);
-  console.log(`gRPC server running on 0.0.0.0:${process.env.GRPC_PORT ?? 5001}`);
+  console.log(`REST API running on http://0.0.0.0:${process.env.REST_PORT}}`);
+  console.log(`gRPC server running on 0.0.0.0:${process.env.GRPC_PORT}`);
 }
 
 bootstrap();
