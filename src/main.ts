@@ -13,7 +13,10 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       package: 'films',
-      protoPath,
+      protoPath: [
+        path.join(process.cwd(), 'src', 'proto', 'films.proto'),
+        path.join(process.cwd(), 'src', 'proto', 'person.proto')
+      ],
       url: `0.0.0.0:${process.env.GRPC_PORT}`,
     },
   });

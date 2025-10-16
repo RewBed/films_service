@@ -15,4 +15,9 @@ export class FilmsController {
   async getRandom(): Promise<any> {
     return this.filmsService.getRandom();
   }
+
+  @Get('counts')
+  async getCounts(): Promise<any> {
+    return this.filmsService.getCounts();
+  }
 }

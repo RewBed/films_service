@@ -70,10 +70,6 @@ export interface FullFilmData {
 
 export interface FilmResponse {
   id: number;
-  title: string;
-  originalTitle: string;
-  createdAt: Timestamp | undefined;
-  updatedAt: Timestamp | undefined;
 }
 
 export const FILMS_PACKAGE_NAME = "films";
@@ -640,25 +636,13 @@ export const FullFilmData: MessageFns<FullFilmData> = {
 };
 
 function createBaseFilmResponse(): FilmResponse {
-  return { id: 0, title: "", originalTitle: "", createdAt: undefined, updatedAt: undefined };
+  return { id: 0 };
 }
 
 export const FilmResponse: MessageFns<FilmResponse> = {
   encode(message: FilmResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== 0) {
       writer.uint32(8).int32(message.id);
-    }
-    if (message.title !== "") {
-      writer.uint32(18).string(message.title);
-    }
-    if (message.originalTitle !== "") {
-      writer.uint32(26).string(message.originalTitle);
-    }
-    if (message.createdAt !== undefined) {
-      Timestamp.encode(message.createdAt, writer.uint32(34).fork()).join();
-    }
-    if (message.updatedAt !== undefined) {
-      Timestamp.encode(message.updatedAt, writer.uint32(42).fork()).join();
     }
     return writer;
   },
@@ -676,38 +660,6 @@ export const FilmResponse: MessageFns<FilmResponse> = {
           }
 
           message.id = reader.int32();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.title = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.originalTitle = reader.string();
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.createdAt = Timestamp.decode(reader, reader.uint32());
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.updatedAt = Timestamp.decode(reader, reader.uint32());
           continue;
         }
       }

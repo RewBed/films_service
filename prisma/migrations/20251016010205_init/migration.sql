@@ -32,6 +32,8 @@ CREATE TABLE "Genre" (
     "id" SERIAL NOT NULL,
     "themoviedbId" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Genre_pkey" PRIMARY KEY ("id")
 );
@@ -40,6 +42,8 @@ CREATE TABLE "Genre" (
 CREATE TABLE "FilmGenre" (
     "filmId" INTEGER NOT NULL,
     "genreId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "FilmGenre_pkey" PRIMARY KEY ("filmId","genreId")
 );
@@ -51,6 +55,8 @@ CREATE TABLE "ProductionCompany" (
     "name" TEXT NOT NULL,
     "originCountry" TEXT,
     "logoPath" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ProductionCompany_pkey" PRIMARY KEY ("id")
 );
@@ -59,6 +65,8 @@ CREATE TABLE "ProductionCompany" (
 CREATE TABLE "FilmProductionCompany" (
     "filmId" INTEGER NOT NULL,
     "companyId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "FilmProductionCompany_pkey" PRIMARY KEY ("filmId","companyId")
 );
@@ -68,6 +76,8 @@ CREATE TABLE "ProductionCountry" (
     "id" SERIAL NOT NULL,
     "isoCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ProductionCountry_pkey" PRIMARY KEY ("id")
 );
@@ -76,6 +86,8 @@ CREATE TABLE "ProductionCountry" (
 CREATE TABLE "FilmProductionCountry" (
     "filmId" INTEGER NOT NULL,
     "countryId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "FilmProductionCountry_pkey" PRIMARY KEY ("filmId","countryId")
 );
@@ -86,6 +98,8 @@ CREATE TABLE "SpokenLanguage" (
     "isoCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "englishName" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "SpokenLanguage_pkey" PRIMARY KEY ("id")
 );
@@ -94,8 +108,43 @@ CREATE TABLE "SpokenLanguage" (
 CREATE TABLE "FilmSpokenLanguage" (
     "filmId" INTEGER NOT NULL,
     "languageId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "FilmSpokenLanguage_pkey" PRIMARY KEY ("filmId","languageId")
+);
+
+-- CreateTable
+CREATE TABLE "Person" (
+    "id" SERIAL NOT NULL,
+    "themoviedbId" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "biography" TEXT,
+    "birthday" TIMESTAMP(3),
+    "deathday" TIMESTAMP(3),
+    "gender" INTEGER,
+    "knownForDepartment" TEXT,
+    "placeOfBirth" TEXT,
+    "profilePath" TEXT,
+    "homepage" TEXT,
+    "popularity" DOUBLE PRECISION,
+    "imdbId" TEXT,
+    "adult" BOOLEAN NOT NULL DEFAULT false,
+    "alsoKnownAs" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Person_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "FilmPerson" (
+    "filmId" INTEGER NOT NULL,
+    "personId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "FilmPerson_pkey" PRIMARY KEY ("filmId","personId")
 );
 
 -- CreateIndex
@@ -112,6 +161,9 @@ CREATE UNIQUE INDEX "ProductionCountry_isoCode_key" ON "ProductionCountry"("isoC
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SpokenLanguage_isoCode_key" ON "SpokenLanguage"("isoCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Person_themoviedbId_key" ON "Person"("themoviedbId");
 
 -- AddForeignKey
 ALTER TABLE "FilmGenre" ADD CONSTRAINT "FilmGenre_filmId_fkey" FOREIGN KEY ("filmId") REFERENCES "Film"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -136,3 +188,9 @@ ALTER TABLE "FilmSpokenLanguage" ADD CONSTRAINT "FilmSpokenLanguage_filmId_fkey"
 
 -- AddForeignKey
 ALTER TABLE "FilmSpokenLanguage" ADD CONSTRAINT "FilmSpokenLanguage_languageId_fkey" FOREIGN KEY ("languageId") REFERENCES "SpokenLanguage"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FilmPerson" ADD CONSTRAINT "FilmPerson_filmId_fkey" FOREIGN KEY ("filmId") REFERENCES "Film"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FilmPerson" ADD CONSTRAINT "FilmPerson_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

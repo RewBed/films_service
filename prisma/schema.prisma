@@ -14,6 +14,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Film
+
 model Film {
   id               Int       @id @default(autoincrement())
   themoviedbId     Int       @unique
@@ -39,28 +41,39 @@ model Film {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  genres            FilmGenre[]
+  genres              FilmGenre[]
   productionCompanies FilmProductionCompany[]
   productionCountries FilmProductionCountry[]
-  spokenLanguages   FilmSpokenLanguage[]
+  spokenLanguages     FilmSpokenLanguage[]
+  persons             FilmPerson[]
 }
+
+// Genre
 
 model Genre {
   id          Int    @id @default(autoincrement())
   themoviedbId Int    @unique  
   name        String
   films       FilmGenre[]
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model FilmGenre {
   filmId  Int
   genreId Int
 
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
   film   Film   @relation(fields: [filmId], references: [id])
   genre  Genre  @relation(fields: [genreId], references: [id])
 
   @@id([filmId, genreId])
 }
+
+// ProductionCompany
 
 model ProductionCompany {
   id           Int    @id @default(autoincrement())
@@ -69,11 +82,16 @@ model ProductionCompany {
   originCountry String?
   logoPath     String?
   films        FilmProductionCompany[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model FilmProductionCompany {
   filmId    Int
   companyId Int
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   film    Film              @relation(fields: [filmId], references: [id])
   company ProductionCompany @relation(fields: [companyId], references: [id])
@@ -81,16 +99,24 @@ model FilmProductionCompany {
   @@id([filmId, companyId])
 }
 
+// ProductionCountry
+
 model ProductionCountry {
   id            Int       @id @default(autoincrement())
   isoCode       String    @unique  
   name          String
   films         FilmProductionCountry[]
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model FilmProductionCountry {
   filmId    Int
   countryId Int
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   film    Film              @relation(fields: [filmId], references: [id])
   country ProductionCountry @relation(fields: [countryId], references: [id])
@@ -98,20 +124,64 @@ model FilmProductionCountry {
   @@id([filmId, countryId])
 }
 
+// SpokenLanguage
+
 model SpokenLanguage {
   id           Int    @id @default(autoincrement())
   isoCode      String @unique
   name         String
   englishName  String?
   films        FilmSpokenLanguage[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model FilmSpokenLanguage {
   filmId      Int
   languageId  Int
 
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
   film     Film           @relation(fields: [filmId], references: [id])
   language SpokenLanguage @relation(fields: [languageId], references: [id])
 
   @@id([filmId, languageId])
+}
+
+// Person
+
+model Person {
+  id                 Int       @id @default(autoincrement())
+  themoviedbId       Int       @unique
+  name               String
+  biography          String?
+  birthday           DateTime?
+  deathday           DateTime?
+  gender             Int?
+  knownForDepartment String?
+  placeOfBirth       String?
+  profilePath        String?
+  homepage           String?
+  popularity         Float?
+  imdbId             String?
+  adult              Boolean   @default(false)
+  alsoKnownAs        String[]  @default([])
+
+  films              FilmPerson[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model FilmPerson {
+  filmId   Int
+  personId Int
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  film     Film   @relation(fields: [filmId], references: [id])
+  person   Person @relation(fields: [personId], references: [id])
+
+  @@id([filmId, personId])
 }

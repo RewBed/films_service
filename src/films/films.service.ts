@@ -11,80 +11,91 @@ export class FilmsService {
     return this.prisma.film.findMany();
   }
 
-  async getRandom(): Promise<any> {
-  const sample = <T>(arr: T[], n: number): T[] =>
-    arr.sort(() => 0.5 - Math.random()).slice(0, n);
-
-  // --- 1. ЖАНРЫ ---
-  const validGenres = await this.prisma.genre.findMany({
-    include: { films: { select: { filmId: true } } },
-  });
-  const genres = validGenres.filter((g) => g.films.length >= 3);
-  const selectedGenres = sample(genres, 3);
-
-  // --- 2. КОМПАНИИ ---
-  const validCompanies = await this.prisma.productionCompany.findMany({
-    include: { films: { select: { filmId: true } } },
-  });
-  const companies = validCompanies.filter((c) => c.films.length >= 3);
-  const selectedCompanies = sample(companies, 3);
-
-  // --- 3. СТРАНЫ ---
-  const validCountries = await this.prisma.productionCountry.findMany({
-    include: { films: { select: { filmId: true } } },
-  });
-  const countries = validCountries.filter((c) => c.films.length >= 3);
-  const selectedCountries = sample(countries, 3);
-
-  // --- 4. ЯЗЫКИ ---
-  const validLanguages = await this.prisma.spokenLanguage.findMany({
-    include: { films: { select: { filmId: true } } },
-  });
-  const languages = validLanguages.filter((l) => l.films.length >= 3);
-  const selectedLanguages = sample(languages, 3);
-
-  // --- 5. СОБИРАЕМ СВЯЗИ ---
-  const referenceGroups = [
-    { type: 'genre', data: selectedGenres },
-    { type: 'company', data: selectedCompanies },
-    { type: 'country', data: selectedCountries },
-    { type: 'language', data: selectedLanguages },
-  ];
-
-  const refResults: {
-    id: number;
-    name: string;
-    filmIds: number[];
-    type: string;
-  }[] = [];
-
-  const filmIdsSet = new Set<number>();
-
-  for (const group of referenceGroups) {
-    for (const ref of group.data) {
-      const filmIds = sample(ref.films.map((f) => f.filmId), 3);
-      refResults.push({
-        id: ref.id,
-        name: (ref as any).name ?? (ref as any).englishName ?? 'unknown',
-        filmIds,
-        type: group.type,
-      });
-      filmIds.forEach((id) => filmIdsSet.add(id));
-    }
+  async getCounts() : Promise<any> {
+    return {
+      filmsCount: (await this.prisma.film.count()).toFixed(),
+      genresCount: (await this.prisma.genre.count()).toFixed(),
+      productionComponiesCount: (await this.prisma.productionCompany.count()).toFixed(),
+      productionCoutries: (await this.prisma.productionCountry.count()).toFixed()
+    };
   }
 
-  // --- 6. ПОЛУЧАЕМ ФИЛЬМЫ ---
-  const allFilmIds = Array.from(filmIdsSet).slice(0, 20);
-  const films = await this.prisma.film.findMany({
-    where: { id: { in: allFilmIds } },
-  });
+  async getRandom(): Promise<any> {
+    const sample = <T>(arr: T[], n: number): T[] =>
+      arr.sort(() => 0.5 - Math.random()).slice(0, n);
 
-  // --- 7. ВОЗВРАЩАЕМ ---
-  return this.normalizeBigInt({
-    films,
-    references: refResults,
-  });
-}
+    // --- 1. ЖАНРЫ ---
+    const validGenres = await this.prisma.genre.findMany({
+      include: { films: { select: { filmId: true } } },
+    });
+    const genres = validGenres.filter((g) => g.films.length >= 3);
+    const selectedGenres = sample(genres, 4);
+
+    // --- 2. КОМПАНИИ ---
+    const validCompanies = await this.prisma.productionCompany.findMany({
+      include: { films: { select: { filmId: true } } },
+    });
+    const companies = validCompanies.filter((c) => c.films.length >= 3);
+    const selectedCompanies = sample(companies, 4);
+
+    // --- 3. СТРАНЫ ---
+    const validCountries = await this.prisma.productionCountry.findMany({
+      include: { films: { select: { filmId: true } } },
+    });
+    const countries = validCountries.filter((c) => c.films.length >= 3);
+    const selectedCountries = sample(countries, 4);
+
+    // --- 4. ЯЗЫКИ ---
+    /*
+    const validLanguages = await this.prisma.spokenLanguage.findMany({
+      include: { films: { select: { filmId: true } } },
+    });
+    const languages = validLanguages.filter((l) => l.films.length >= 3);
+    const selectedLanguages = sample(languages, 3);
+    */
+
+    // --- 5. СОБИРАЕМ СВЯЗИ ---
+    const referenceGroups = [
+      { type: 'genre', data: selectedGenres },
+      { type: 'company', data: selectedCompanies },
+      { type: 'country', data: selectedCountries },
+      // { type: 'language', data: selectedLanguages },
+    ];
+
+    const refResults: {
+      id: number;
+      name: string;
+      filmIds: number[];
+      type: string;
+    }[] = [];
+
+    const filmIdsSet = new Set<number>();
+
+    for (const group of referenceGroups) {
+      for (const ref of group.data) {
+        const filmIds = sample(ref.films.map((f) => f.filmId), 3);
+        refResults.push({
+          id: ref.id,
+          name: (ref as any).name ?? (ref as any).englishName ?? 'unknown',
+          filmIds,
+          type: group.type,
+        });
+        filmIds.forEach((id) => filmIdsSet.add(id));
+      }
+    }
+
+    // --- 6. ПОЛУЧАЕМ ФИЛЬМЫ ---
+    const allFilmIds = Array.from(filmIdsSet).slice(0, 20);
+    const films = await this.prisma.film.findMany({
+      where: { id: { in: allFilmIds } },
+    });
+
+    // --- 7. ВОЗВРАЩАЕМ ---
+    return this.normalizeBigInt({
+      films,
+      references: refResults,
+    });
+  }
 
   normalizeBigInt(obj: any): any {
     if (typeof obj === 'bigint') return Number(obj);
@@ -101,7 +112,6 @@ export class FilmsService {
 
     return obj;
   }
-
 
   // gRPC метод upsert фильма
   async upsertFilm(data: FullFilmData): Promise<FilmResponse> {
@@ -226,11 +236,7 @@ export class FilmsService {
 
   private mapFilmToResponse(film: any): FilmResponse {
     return {
-      id: film.id,
-      title: film.title,
-      originalTitle: film.originalTitle || "",
-      createdAt: this.dateToTimestamp(film.createdAt),
-      updatedAt: this.dateToTimestamp(film.updatedAt),
+      id: film.id
     };
   }
 
